@@ -181,61 +181,66 @@ if uploaded_file is not None:
 else:
     st.warning("Silakan unggah file CSV kandidat terlebih dahulu di sidebar.")
 
+# Load dan olah data
+file_path = os.path.join(os.path.dirname(__file__), 'sikma.csv')
+df = pd.read_csv(file_path)
+df_sorted = df.sort_values(by="Full Name|name-1")
+#Degree|radio-4
+
 st.markdown("""
     <style>
-    /* 🌑 Background utama aplikasi */
-    .stApp {
-        background-color: #121212;  /* Ganti sesuai selera */
-        color: #f0f0f0;
-    }
-
-    /* 🧭 Sidebar */
+    /* Ubah warna teks di sidebar */
     section[data-testid="stSidebar"] {
-        background-color: #1f1f1f;
         color: white;
     }
 
-    /* 🎚️ Slider dan header di sidebar */
+    /* Ubah warna teks slider dan subheader di sidebar */
     section[data-testid="stSidebar"] .stSlider label,
     section[data-testid="stSidebar"] h1,
     section[data-testid="stSidebar"] h2,
     section[data-testid="stSidebar"] h3 {
         color: white !important;
     }
+    </style>
+""", unsafe_allow_html=True)
 
-    /* 🔽 Dropdown button (nama yang dipilih) */
-    div[data-testid="stSelectbox"] div[role="button"] {
-        background-color: #2c2c2c !important;
-        color: #00FFAA !important;  /* Warna teks dropdown */
-        font-weight: bold;
-        border-radius: 5px;
-    }
-
-    /* 🔽 Dropdown list item */
-    ul[data-testid="stDropdownMenu"] li {
-        background-color: #2c2c2c !important;
-        color: #00FFAA !important;
-        font-weight: bold;
-    }
-
-    /* 🔽 Panah dropdown */
+st.markdown("""
+    <style>
+    /* Panah dropdown jadi hitam */
     div[data-testid="stSelectbox"] svg {
-        fill: #00FFAA !important;
+        fill: white !important;
     }
+    </style>
+""", unsafe_allow_html=True)
 
-    /* 📊 Tabel dan teks umum */
-    .stDataFrame, .stMarkdown, .stText {
-        color: #f0f0f0 !important;
+st.markdown("""
+    <style>
+    div[data-testid="stSelectbox"] div[role="button"] {
+        background-color: #FFFFFF !important;
+        color: white !important;
     }
+    ul[data-testid="stDropdownMenu"] li {
+        background-color: #FFFFFF !important;
+        color: white !important;
+    }
+    div[data-testid="stSelectbox"] svg {
+        fill: #white !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
-    /* 🧾 Judul dan subjudul */
-    h1, h2, h3, h4 {
-        color: #13FFAA !important;
-    }
-
-    /* 🧩 Box dan container */
-    .stContainer {
-        background-color: transparent;
-    }
+st.markdown("""
+    <style>
+        section[data-testid="stSidebar"] {
+            color: white;
+        }
+        section[data-testid="stSidebar"] h1,
+        section[data-testid="stSidebar"] h2,
+        section[data-testid="stSidebar"] h3 {
+            color: white;
+        }
+        .stSlider label {
+            color: white !important;
+        }
     </style>
 """, unsafe_allow_html=True)
