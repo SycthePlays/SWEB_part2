@@ -183,58 +183,59 @@ else:
 
 st.markdown("""
     <style>
-    /* Ubah warna teks di sidebar */
+    /* 🌑 Background utama aplikasi */
+    .stApp {
+        background-color: #121212;  /* Ganti sesuai selera */
+        color: #f0f0f0;
+    }
+
+    /* 🧭 Sidebar */
     section[data-testid="stSidebar"] {
+        background-color: #1f1f1f;
         color: white;
     }
 
-    /* Ubah warna teks slider dan subheader di sidebar */
+    /* 🎚️ Slider dan header di sidebar */
     section[data-testid="stSidebar"] .stSlider label,
     section[data-testid="stSidebar"] h1,
     section[data-testid="stSidebar"] h2,
     section[data-testid="stSidebar"] h3 {
         color: white !important;
     }
-    </style>
-""", unsafe_allow_html=True)
 
-st.markdown("""
-    <style>
-    /* Panah dropdown jadi hitam */
-    div[data-testid="stSelectbox"] svg {
-        fill: white !important;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-st.markdown("""
-    <style>
+    /* 🔽 Dropdown button (nama yang dipilih) */
     div[data-testid="stSelectbox"] div[role="button"] {
-        background-color: #FFFFFF !important;
-        color: white !important;
+        background-color: #2c2c2c !important;
+        color: #00FFAA !important;  /* Warna teks dropdown */
+        font-weight: bold;
+        border-radius: 5px;
     }
-    ul[data-testid="stDropdownMenu"] li {
-        background-color: #FFFFFF !important;
-        color: white !important;
-    }
-    div[data-testid="stSelectbox"] svg {
-        fill: #white !important;
-    }
-    </style>
-""", unsafe_allow_html=True)
 
-st.markdown("""
-    <style>
-        section[data-testid="stSidebar"] {
-            color: white;
-        }
-        section[data-testid="stSidebar"] h1,
-        section[data-testid="stSidebar"] h2,
-        section[data-testid="stSidebar"] h3 {
-            color: white;
-        }
-        .stSlider label {
-            color: white !important;
-        }
+    /* 🔽 Dropdown list item */
+    ul[data-testid="stDropdownMenu"] li {
+        background-color: #2c2c2c !important;
+        color: #00FFAA !important;
+        font-weight: bold;
+    }
+
+    /* 🔽 Panah dropdown */
+    div[data-testid="stSelectbox"] svg {
+        fill: #00FFAA !important;
+    }
+
+    /* 📊 Tabel dan teks umum */
+    .stDataFrame, .stMarkdown, .stText {
+        color: #f0f0f0 !important;
+    }
+
+    /* 🧾 Judul dan subjudul */
+    h1, h2, h3, h4 {
+        color: #00FFAA !important;
+    }
+
+    /* 🧩 Box dan container */
+    .stContainer {
+        background-color: transparent;
+    }
     </style>
 """, unsafe_allow_html=True)
