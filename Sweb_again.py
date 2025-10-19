@@ -183,59 +183,54 @@ else:
 
 st.markdown("""
     <style>
-    /* Ubah warna teks di sidebar */
-    section[data-testid="stSidebar"] {
-        color: white;
+    /* 🌑 Background utama */
+    body, .main {
+        background-color: #1e1e1e;
+        color: #f0f0f0;
     }
 
-    /* Ubah warna teks slider dan subheader di sidebar */
+    /* 🧭 Sidebar */
+    section[data-testid="stSidebar"] {
+        background-color: #2c2f33;
+        color: #ffffff;
+    }
+
+    /* 🎚️ Slider dan header di sidebar */
     section[data-testid="stSidebar"] .stSlider label,
     section[data-testid="stSidebar"] h1,
     section[data-testid="stSidebar"] h2,
     section[data-testid="stSidebar"] h3 {
-        color: white !important;
+        color: #ffffff !important;
     }
-    </style>
-""", unsafe_allow_html=True)
 
-st.markdown("""
-    <style>
-    /* Panah dropdown jadi hitam */
-    div[data-testid="stSelectbox"] svg {
-        fill: white !important;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-st.markdown("""
-    <style>
+    /* 🔽 Dropdown */
     div[data-testid="stSelectbox"] div[role="button"] {
-        background-color: #FFFFFF !important;
-        color: white !important;
+        background-color: #3c3f44 !important;
+        color: #ffffff !important;
     }
+
     ul[data-testid="stDropdownMenu"] li {
-        background-color: #FFFFFF !important;
-        color: white !important;
+        background-color: #3c3f44 !important;
+        color: #ffffff !important;
     }
+
     div[data-testid="stSelectbox"] svg {
-        fill: #white !important;
+        fill: #ffffff !important;
     }
-    </style>
-""", unsafe_allow_html=True)
 
+    /* 📊 Tabel dan teks */
+    .stDataFrame, .stMarkdown, .stText {
+        color: #f0f0f0 !important;
+    }
 
-st.markdown("""
-    <style>
-        section[data-testid="stSidebar"] {
-            color: white;
-        }
-        section[data-testid="stSidebar"] h1,
-        section[data-testid="stSidebar"] h2,
-        section[data-testid="stSidebar"] h3 {
-            color: white;
-        }
-        .stSlider label {
-            color: white !important;
-        }
+    /* 🧾 Judul dan subjudul */
+    h1, h2, h3, h4 {
+        color: #ffffff !important;
+    }
+
+    /* 🧩 Box dan container */
+    .stApp {
+        background-color: #1e1e1e;
+    }
     </style>
 """, unsafe_allow_html=True)
