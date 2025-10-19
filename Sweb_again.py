@@ -183,54 +183,58 @@ else:
 
 st.markdown("""
     <style>
-    /* 🌑 Background utama */
-    body, .main {
-        background-color: #1e1e1e;
-        color: #f0f0f0;
-    }
-
-    /* 🧭 Sidebar */
+    /* Ubah warna teks di sidebar */
     section[data-testid="stSidebar"] {
-        background-color: #2c2f33;
-        color: #ffffff;
+        color: white;
     }
 
-    /* 🎚️ Slider dan header di sidebar */
+    /* Ubah warna teks slider dan subheader di sidebar */
     section[data-testid="stSidebar"] .stSlider label,
     section[data-testid="stSidebar"] h1,
     section[data-testid="stSidebar"] h2,
     section[data-testid="stSidebar"] h3 {
-        color: #ffffff !important;
+        color: white !important;
     }
+    </style>
+""", unsafe_allow_html=True)
 
-    /* 🔽 Dropdown */
-    div[data-testid="stSelectbox"] div[role="button"] {
-        background-color: #3c3f44 !important;
-        color: #ffffff !important;
-    }
-
-    ul[data-testid="stDropdownMenu"] li {
-        background-color: #3c3f44 !important;
-        color: #ffffff !important;
-    }
-
+st.markdown("""
+    <style>
+    /* Panah dropdown jadi hitam */
     div[data-testid="stSelectbox"] svg {
-        fill: #ffffff !important;
+        fill: white !important;
     }
+    </style>
+""", unsafe_allow_html=True)
 
-    /* 📊 Tabel dan teks */
-    .stDataFrame, .stMarkdown, .stText {
-        color: #f0f0f0 !important;
+st.markdown("""
+    <style>
+    div[data-testid="stSelectbox"] div[role="button"] {
+        background-color: #FFFFFF !important;
+        color: white !important;
     }
+    ul[data-testid="stDropdownMenu"] li {
+        background-color: #FFFFFF !important;
+        color: white !important;
+    }
+    div[data-testid="stSelectbox"] svg {
+        fill: #white !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
-    /* 🧾 Judul dan subjudul */
-    h1, h2, h3, h4 {
-        color: #ffffff !important;
-    }
-
-    /* 🧩 Box dan container */
-    .stApp {
-        background-color: #1e1e1e;
-    }
+st.markdown("""
+    <style>
+        section[data-testid="stSidebar"] {
+            color: white;
+        }
+        section[data-testid="stSidebar"] h1,
+        section[data-testid="stSidebar"] h2,
+        section[data-testid="stSidebar"] h3 {
+            color: white;
+        }
+        .stSlider label {
+            color: white !important;
+        }
     </style>
 """, unsafe_allow_html=True)
