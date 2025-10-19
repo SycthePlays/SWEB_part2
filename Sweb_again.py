@@ -230,7 +230,7 @@ st.markdown("""
 
     /* 🧾 Judul dan subjudul */
     h1, h2, h3, h4 {
-        color: #00FFAA !important;
+        color: #13FFAA !important;
     }
 
     /* 🧩 Box dan container */
