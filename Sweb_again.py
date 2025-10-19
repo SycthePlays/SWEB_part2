@@ -181,12 +181,6 @@ if uploaded_file is not None:
 else:
     st.warning("Silakan unggah file CSV kandidat terlebih dahulu di sidebar.")
 
-# Load dan olah data
-file_path = os.path.join(os.path.dirname(__file__), 'sikma.csv')
-df = pd.read_csv(file_path)
-df_sorted = df.sort_values(by="Full Name|name-1")
-#Degree|radio-4
-
 st.markdown("""
     <style>
     /* Ubah warna teks di sidebar */
