@@ -222,3 +222,19 @@ if uploaded_file is not None:
     )
 else:
     st.warning("Silakan unggah file CSV kandidat terlebih dahulu di sidebar.")
+
+st.markdown("""
+    <style>
+        section[data-testid="stSidebar"] {
+            color: white;
+        }
+        section[data-testid="stSidebar"] h1,
+        section[data-testid="stSidebar"] h2,
+        section[data-testid="stSidebar"] h3 {
+            color: white;
+        }
+        .stSlider label {
+            color: white !important;
+        }
+    </style>
+""", unsafe_allow_html=True)
