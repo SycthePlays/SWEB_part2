@@ -10,6 +10,49 @@ import streamlit as st
 # -------------------------------
 # 🎯 Sidebar: Upload & Parameters
 # -------------------------------
+
+st.markdown("""
+    <style>
+    /* Ubah warna teks di sidebar */
+    section[data-testid="stSidebar"] {
+        color: white;
+    }
+
+    /* Ubah warna teks slider dan subheader di sidebar */
+    section[data-testid="stSidebar"] .stSlider label,
+    section[data-testid="stSidebar"] h1,
+    section[data-testid="stSidebar"] h2,
+    section[data-testid="stSidebar"] h3 {
+        color: white !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+    <style>
+    /* Panah dropdown jadi hitam */
+    div[data-testid="stSelectbox"] svg {
+        fill: white !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+st.markdown("""
+    <style>
+    div[data-testid="stSelectbox"] div[role="button"] {
+        background-color: #FFFFFF !important;
+        color: white !important;
+    }
+    ul[data-testid="stDropdownMenu"] li {
+        background-color: #FFFFFF !important;
+        color: white !important;
+    }
+    div[data-testid="stSelectbox"] svg {
+        fill: #white !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 st.sidebar.title("Parameter Penilaian")
 
 uploaded_file = st.sidebar.file_uploader("Pilih file CSV kandidat", type=["csv"])
