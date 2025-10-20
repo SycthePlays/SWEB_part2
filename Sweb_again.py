@@ -238,3 +238,14 @@ st.markdown("""
         }
     </style>
 """, unsafe_allow_html=True)
+
+st.markdown("""
+    <style>
+    /* Ubah warna background dan teks dari st.warning */
+    div[data-testid="stNotification"] {
+        background-color: #FF4B4B !important;  /* Ganti dengan warna yang kamu mau */
+        color: white !important;
+        border-left: 5px solid white !important;
+    }
+    </style>
+""", unsafe_allow_html=True)
