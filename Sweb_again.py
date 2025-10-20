@@ -243,7 +243,7 @@ st.markdown("""
     <style>
     /* Ubah warna background dan teks dari st.warning */
     div[data-testid="stNotification"] {
-        background-color: #FF4B4B !important;  /* Ganti dengan warna yang kamu mau */
+        background-color: #FFFFFF !important;  /* Ganti dengan warna yang kamu mau */
         color: white !important;
         border-left: 5px solid white !important;
     }
