@@ -57,7 +57,7 @@ def evaluate_candidates(df_sorted, weights):
                 data_Uni.append(100)
             elif s1 in ["Universitas Indonesia (UI)", "Institut Teknologi Bandung (ITB)", "Universitas Gadjah Mada (UGM)"]:
                 data_Uni.append(100)
-            elif "Binus" in s1 or "Brawijaya" in s1 or "Prasetiya" in s1:
+            elif "Binus" in s1 or "Brawijaya" in s1 or "Prasetiya" in s1 or "ITS" in s1 or "UNAIR" in s1 or "UNDIP" in s1 or "IPB" in s1 or "UNPAD" in s1:
                 data_Uni.append(70)
             else:
                 data_Uni.append(40)
