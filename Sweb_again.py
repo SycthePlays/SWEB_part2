@@ -144,6 +144,22 @@ if uploaded_file is not None:
     weights = (w_uni, w_gpa, w_intern, w_ach, w_case, w_type, w_role, w_LT, w_ANA, w_LS)
     temp1, temp1_1 = evaluate_candidates(df_sorted, weights)
 
+    st.subheader("Tabel Ringkasan Penilaian")
+    st.dataframe(
+        temp1[["Name", "Logical Thinking", "Analytical Skills", "Leadership", "Overall"]]
+        .sort_values(by="Name", ascending=True)
+        .reset_index(drop=True),
+        use_container_width=True
+    )
+
+    st.subheader("Tabel Logical Thinking")
+    st.dataframe(
+        temp1_1[["Name", "Experience", "GPA", "Logical Thinking"]]
+        .sort_values(by="Name", ascending=True)
+        .reset_index(drop=True),
+        use_container_width=True
+    )
+    
     st.title("Visualisasi Penilaian Kandidat")
     selected_name = st.selectbox("Pilih Nama:", temp1["Name"])
     row = temp1[temp1["Name"] == selected_name].iloc[0]
@@ -163,21 +179,6 @@ if uploaded_file is not None:
     )
     st.plotly_chart(fig)
 
-    st.subheader("Tabel Ringkasan Penilaian")
-    st.dataframe(
-        temp1[["Name", "Logical Thinking", "Analytical Skills", "Leadership", "Overall"]]
-        .sort_values(by="Name", ascending=True)
-        .reset_index(drop=True),
-        use_container_width=True
-    )
-
-    st.subheader("Tabel Logical Thinking")
-    st.dataframe(
-        temp1_1[["Name", "Experience", "GPA", "Logical Thinking"]]
-        .sort_values(by="Name", ascending=True)
-        .reset_index(drop=True),
-        use_container_width=True
-    )
 else:
     st.warning("Silakan unggah file CSV kandidat terlebih dahulu di sidebar.")
 
