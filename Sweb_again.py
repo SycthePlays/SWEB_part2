@@ -210,7 +210,7 @@ def render_summary_html(df_display):
     /* Sub rows: label bold black, value normal but black */
     .sub-row { margin: 2px 0; line-height: 1.2; }
     .sub-label { font-weight: 700; color: #000; display:inline-block; width: 110px; }
-    .sub-value { margin-left: 6px; color: #000; font-weight: 600; }
+    .sub-value { margin-left: 125px; color: #000; font-weight: 600; }
     .overall-cell { font-weight: 800; text-align: center; background-color: #f8fafc; color: #000; }
     .meta { color: #333; font-size: 13px; font-weight: 600; }
     /* Make Name column slightly larger and bold */
