@@ -201,16 +201,26 @@ def evaluate_candidates(df_sorted, weights):
 def render_summary_html(df_display):
     css = """
     <style>
-    .summary-table { border-collapse: collapse; width: 100%; font-family: sans-serif, sans-serif; }
-    .summary-table th, .summary-table td { border: 1px solid #ddd; padding: 8px; vertical-align: top; }
-    .summary-table th { background-color: #f4f6fb; text-align: left; padding-top: 12px; padding-bottom: 12px; }
-    .cat-title { font-weight: 700; color: #0b5cff; margin-bottom: 6px; display:block; }
-    .sub-row { margin: 2px 0; }
-    .sub-label { font-weight: 600; color: #333; }
-    .sub-value { margin-left: 150px; color: #111; }
-    .overall-cell { font-weight: 700; text-align: center; background-color: #f8fafc; }
-    .meta { color: #666; font-size: 13px; }
+    /* Global font and table styling */
+    .summary-table { border-collapse: collapse; width: 100%; font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 14px; color: #000; }
+    .summary-table th, .summary-table td { border: 1px solid #ddd; padding: 10px; vertical-align: top; color: #000; }
+    .summary-table th { background-color: #f4f6fb; text-align: left; padding-top: 12px; padding-bottom: 12px; font-weight: 800; color: #000; }
+    /* Category title (bold, black) */
+    .cat-title { font-weight: 800; color: #000; margin-bottom: 6px; display:block; font-size: 13px; }
+    /* Sub rows: label bold black, value normal but black */
+    .sub-row { margin: 2px 0; line-height: 1.2; }
+    .sub-label { font-weight: 700; color: #000; display:inline-block; width: 110px; }
+    .sub-value { margin-left: 6px; color: #000; font-weight: 600; }
+    .overall-cell { font-weight: 800; text-align: center; background-color: #f8fafc; color: #000; }
+    .meta { color: #333; font-size: 13px; font-weight: 600; }
+    /* Make Name column slightly larger and bold */
+    .name-cell { font-weight: 700; color: #000; }
+    /* Responsive tweaks */
+    @media (max-width: 800px) {
+      .sub-label { display:block; width: auto; }
+    }
     </style>
+
     """
 
     header = """
