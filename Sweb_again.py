@@ -196,21 +196,18 @@ def evaluate_candidates(df_sorted, weights):
     return df_out
 
 # -------------------------------
-# Helper: render HTML table with subheadings (updated to include numbering)
+# Helper: render HTML table with subheadings (updated to use iterrows)
 # -------------------------------
 def render_summary_html(df_display):
     css = """
     <style>
-    /* Global font and table styling */
     .summary-table { border-collapse: collapse; width: 100%; font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 14px; color: #000; }
     .summary-table th, .summary-table td { border: 1px solid #ddd; padding: 10px; vertical-align: top; color: #000; }
     .summary-table th { background-color: #f4f6fb; text-align: left; padding-top: 12px; padding-bottom: 12px; font-weight: 800; color: #000; }
-    /* Category title (bold, black) */
     .cat-title { font-weight: 800; color: #000; margin-bottom: 6px; display:block; font-size: 13px; }
-    /* Sub rows: label bold black, value normal but black */
     .sub-row { margin: 2px 0; line-height: 1.2; }
     .sub-label { font-weight: 700; color: #000; display:inline-block; width: 110px; }
-    .sub-value { margin-left: 125px; color: #000; font-weight: 600; }
+    .sub-value { margin-left: 6px; color: #000; font-weight: 600; }
     .overall-cell { font-weight: 800; text-align: center; background-color: #f8fafc; color: #000; }
     .meta { color: #333; font-size: 13px; font-weight: 600; }
     .name-cell { font-weight: 700; color: #000; }
@@ -239,10 +236,10 @@ def render_summary_html(df_display):
     """
 
     rows_html = ""
-    for idx, r in enumerate(df_display.itertuples(), start=1):
-        lt = r.Logical_Thinking_display if hasattr(r, "Logical_Thinking_display") else r._asdict().get("Logical Thinking_display")
-        an = r.Analytical_Skills_display if hasattr(r, "Analytical_Skills_display") else r._asdict().get("Analytical Skills_display")
-        ls = r.Leadership_display if hasattr(r, "Leadership_display") else r._asdict().get("Leadership_display")
+    for idx, (_, r) in enumerate(df_display.iterrows(), start=1):
+        lt = r["Logical Thinking_display"]
+        an = r["Analytical Skills_display"]
+        ls = r["Leadership_display"]
 
         def render_cat(cat):
             inner = f'<span class="cat-title">{cat["title"]}</span>'
@@ -257,13 +254,13 @@ def render_summary_html(df_display):
         rows_html += f"""
         <tr>
           <td class="index-cell">{idx}</td>
-          <td class="meta">{r.Email}</td>
-          <td class="name-cell">{r.Name}</td>
-          <td class="meta">{r._asdict().get('Submission Date','')}</td>
+          <td class="meta">{r.get('Email','')}</td>
+          <td class="name-cell">{r['Name']}</td>
+          <td class="meta">{r.get('Submission Date','')}</td>
           <td>{lt_html}</td>
           <td>{an_html}</td>
           <td>{ls_html}</td>
-          <td class="overall-cell">{r.Overall}</td>
+          <td class="overall-cell">{r['Overall']}</td>
         </tr>
         """
 
@@ -280,7 +277,7 @@ def render_summary_html(df_display):
 # -------------------------------
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
-    df_sorted = df.sort_values(by="Full Name|name-1")
+    df_sorted = df.sort_values(by="Full Name|name-1").reset_index(drop=True)
     weights = (w_uni, w_gpa, w_intern, w_ach, w_case, w_type, w_role, w_LT, w_ANA, w_LS)
     temp1 = evaluate_candidates(df_sorted, weights)
 
@@ -312,23 +309,27 @@ if uploaded_file is not None:
     # Radar chart still uses numeric scores
     st.title("Visualisasi Penilaian Kandidat")
     # For the selectbox, use the filtered list so user can pick from search results
-    selected_name = st.selectbox("Pilih Nama:", filtered["Name"].tolist())
-    row = filtered[filtered["Name"] == selected_name].iloc[0]
+    names_list = filtered["Name"].tolist()
+    if names_list:
+        selected_name = st.selectbox("Pilih Nama:", names_list)
+        row = filtered[filtered["Name"] == selected_name].iloc[0]
 
-    categories = ["Logical Thinking", "Analytical Skills", "Leadership"]
-    values = [row["LT_score"], row["AS_score"], row["LS_score"]]
-    values += [values[0]]
-    categories += [categories[0]]
+        categories = ["Logical Thinking", "Analytical Skills", "Leadership"]
+        values = [row["LT_score"], row["AS_score"], row["LS_score"]]
+        values += [values[0]]
+        categories += [categories[0]]
 
-    fig = go.Figure(
-        data=[go.Scatterpolar(r=values, theta=categories, fill='toself', name=row["Name"])]
-    )
-    fig.update_layout(
-        polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
-        showlegend=False,
-        title=f"Radar Chart: {row['Name']}"
-    )
-    st.plotly_chart(fig)
+        fig = go.Figure(
+            data=[go.Scatterpolar(r=values, theta=categories, fill='toself', name=row["Name"])]
+        )
+        fig.update_layout(
+            polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
+            showlegend=False,
+            title=f"Radar Chart: {row['Name']}"
+        )
+        st.plotly_chart(fig)
+    else:
+        st.info("Tidak ada kandidat yang cocok dengan pencarian.")
 
 else:
     st.warning("Silakan unggah file CSV kandidat terlebih dahulu di sidebar.")
