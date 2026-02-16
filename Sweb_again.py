@@ -207,7 +207,7 @@ def render_summary_html(df_display):
     .cat-title { font-weight: 800; color: #000; margin-bottom: 6px; display:block; font-size: 13px; }
     .sub-row { margin: 2px 0; line-height: 1.2; }
     .sub-label { font-weight: 700; color: #000; display:inline-block; width: 110px; }
-    .sub-value { margin-left: 6px; color: #000; font-weight: 600; }
+    .sub-value { margin-left: 125px; color: #000; font-weight: 1000; }
     .overall-cell { font-weight: 800; text-align: center; background-color: #f8fafc; color: #000; }
     .meta { color: #333; font-size: 13px; font-weight: 600; }
     .name-cell { font-weight: 700; color: #000; }
