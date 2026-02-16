@@ -164,7 +164,7 @@ def evaluate_candidates(df_sorted, weights):
             "rows": [
                 ("University", int(r['Uni_score'])),
                 ("GPA", int(r['GPA_score'])),
-                ("OVR", round(r['LT_score'], 2))
+                ("Overall", round(r['LT_score'], 2))
             ]
         },
         axis=1
@@ -176,7 +176,7 @@ def evaluate_candidates(df_sorted, weights):
                 ("Internship", int(r['Internship_score'])),
                 ("Achievement", int(r['Achievement_score'])),
                 ("Business Case", int(r['BusinessCase_score'])),
-                ("OVR", round(r['AS_score'], 2))
+                ("Overall", round(r['AS_score'], 2))
             ]
         },
         axis=1
@@ -187,7 +187,7 @@ def evaluate_candidates(df_sorted, weights):
             "rows": [
                 ("Org Type", int(r['OrgType_score'])),
                 ("Org Role", int(r['OrgRole_score'])),
-                ("OVR", round(r['LS_score'], 2))
+                ("Overall", round(r['LS_score'], 2))
             ]
         },
         axis=1
