@@ -164,7 +164,7 @@ def evaluate_candidates(df_sorted, weights):
             "rows": [
                 ("University", int(r['Uni_score'])),
                 ("GPA", int(r['GPA_score'])),
-                ("Overall", round(r['LT_score'], 2))
+                ("OVR", round(r['LT_score'], 2))
             ]
         },
         axis=1
@@ -176,7 +176,7 @@ def evaluate_candidates(df_sorted, weights):
                 ("Internship", int(r['Internship_score'])),
                 ("Achievement", int(r['Achievement_score'])),
                 ("Business Case", int(r['BusinessCase_score'])),
-                ("Overall", round(r['AS_score'], 2))
+                ("OVR", round(r['AS_score'], 2))
             ]
         },
         axis=1
@@ -187,7 +187,7 @@ def evaluate_candidates(df_sorted, weights):
             "rows": [
                 ("Org Type", int(r['OrgType_score'])),
                 ("Org Role", int(r['OrgRole_score'])),
-                ("Overall", round(r['LS_score'], 2))
+                ("OVR", round(r['LS_score'], 2))
             ]
         },
         axis=1
@@ -196,7 +196,7 @@ def evaluate_candidates(df_sorted, weights):
     return df_out
 
 # -------------------------------
-# Helper: render HTML table with subheadings
+# Helper: render HTML table with subheadings (updated to include numbering)
 # -------------------------------
 def render_summary_html(df_display):
     css = """
@@ -213,20 +213,19 @@ def render_summary_html(df_display):
     .sub-value { margin-left: 125px; color: #000; font-weight: 600; }
     .overall-cell { font-weight: 800; text-align: center; background-color: #f8fafc; color: #000; }
     .meta { color: #333; font-size: 13px; font-weight: 600; }
-    /* Make Name column slightly larger and bold */
     .name-cell { font-weight: 700; color: #000; }
-    /* Responsive tweaks */
+    .index-cell { font-weight: 700; color: #000; text-align: center; width: 50px; }
     @media (max-width: 800px) {
       .sub-label { display:block; width: auto; }
     }
     </style>
-
     """
 
     header = """
     <table class="summary-table">
       <thead>
         <tr>
+          <th>No</th>
           <th>Email</th>
           <th>Name</th>
           <th>Submission Date</th>
@@ -240,15 +239,15 @@ def render_summary_html(df_display):
     """
 
     rows_html = ""
-    for _, r in df_display.iterrows():
-        lt = r["Logical Thinking_display"]
-        an = r["Analytical Skills_display"]
-        ls = r["Leadership_display"]
+    for idx, r in enumerate(df_display.itertuples(), start=1):
+        lt = r.Logical_Thinking_display if hasattr(r, "Logical_Thinking_display") else r._asdict().get("Logical Thinking_display")
+        an = r.Analytical_Skills_display if hasattr(r, "Analytical_Skills_display") else r._asdict().get("Analytical Skills_display")
+        ls = r.Leadership_display if hasattr(r, "Leadership_display") else r._asdict().get("Leadership_display")
 
         def render_cat(cat):
             inner = f'<span class="cat-title">{cat["title"]}</span>'
             for label, val in cat["rows"]:
-                inner += f'<div class="sub-row"><span class="sub-label">{label}</span>: <span class="sub-value">{val}</span></div>'
+                inner += f'<div class="sub-row"><span class="sub-label">{label}</span><span class="sub-value">{val}</span></div>'
             return inner
 
         lt_html = render_cat(lt)
@@ -257,13 +256,14 @@ def render_summary_html(df_display):
 
         rows_html += f"""
         <tr>
-          <td class="meta">{r.get('Email','')}</td>
-          <td>{r['Name']}</td>
-          <td class="meta">{r.get('Submission Date','')}</td>
+          <td class="index-cell">{idx}</td>
+          <td class="meta">{r.Email}</td>
+          <td class="name-cell">{r.Name}</td>
+          <td class="meta">{r._asdict().get('Submission Date','')}</td>
           <td>{lt_html}</td>
           <td>{an_html}</td>
           <td>{ls_html}</td>
-          <td class="overall-cell">{r['Overall']}</td>
+          <td class="overall-cell">{r.Overall}</td>
         </tr>
         """
 
@@ -284,21 +284,36 @@ if uploaded_file is not None:
     weights = (w_uni, w_gpa, w_intern, w_ach, w_case, w_type, w_role, w_LT, w_ANA, w_LS)
     temp1 = evaluate_candidates(df_sorted, weights)
 
-    # Render HTML summary table using components.html so it does not show raw code
+    # --- Search and Sort controls ---
     st.subheader("Tabel Ringkasan Penilaian")
-    html_table = render_summary_html(temp1)
+    search_query = st.text_input("Cari nama (ketik sebagian nama untuk mencari)", value="")
+    sort_option = st.selectbox("Urutkan berdasarkan Overall", options=["Descending (tertinggi)", "Ascending (terendah)"])
 
-    # compute height dynamically (approx 80px per row + header)
-    approx_height = 160 + len(temp1) * 80
-    # limit height to a reasonable max to avoid extremely tall embeds
-    height = min(max(approx_height, 300), 2000)
+    # Filter by search (case-insensitive, partial)
+    if search_query.strip() != "":
+        mask = temp1["Name"].str.contains(search_query.strip(), case=False, na=False)
+        filtered = temp1[mask].copy()
+    else:
+        filtered = temp1.copy()
+
+    # Sort by Overall
+    ascending = True if sort_option.startswith("Ascending") else False
+    filtered = filtered.sort_values(by="Overall", ascending=ascending).reset_index(drop=True)
+
+    # Render HTML summary table using components.html
+    html_table = render_summary_html(filtered)
+
+    # compute height dynamically (approx 120px per row + header)
+    approx_height = 160 + len(filtered) * 120
+    height = min(max(approx_height, 300), 2200)
 
     components.html(html_table, height=height, scrolling=True)
 
     # Radar chart still uses numeric scores
     st.title("Visualisasi Penilaian Kandidat")
-    selected_name = st.selectbox("Pilih Nama:", temp1["Name"])
-    row = temp1[temp1["Name"] == selected_name].iloc[0]
+    # For the selectbox, use the filtered list so user can pick from search results
+    selected_name = st.selectbox("Pilih Nama:", filtered["Name"].tolist())
+    row = filtered[filtered["Name"] == selected_name].iloc[0]
 
     categories = ["Logical Thinking", "Analytical Skills", "Leadership"]
     values = [row["LT_score"], row["AS_score"], row["LS_score"]]
