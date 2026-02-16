@@ -206,7 +206,7 @@ def render_summary_html(df_display):
     .summary-table th { background-color: #f4f6fb; text-align: left; padding-top: 12px; padding-bottom: 12px; font-weight: 800; color: #000; }
     .cat-title { font-weight: 800; color: #000; margin-bottom: 6px; display:block; font-size: 13px; }
     .sub-row { margin: 2px 0; line-height: 1.2; }
-    .sub-label { font-weight: 700; color: #000; display:inline-block; width: 110px; }
+    .sub-label { font-weight: 700; color: #000; display:inline-block; width: 100px; }
     .sub-value { margin-left: 125px; color: #000; font-weight: 1000; }
     .overall-cell { font-weight: 800; text-align: center; background-color: #f8fafc; color: #000; }
     .meta { color: #333; font-size: 13px; font-weight: 600; }
@@ -281,10 +281,20 @@ if uploaded_file is not None:
     weights = (w_uni, w_gpa, w_intern, w_ach, w_case, w_type, w_role, w_LT, w_ANA, w_LS)
     temp1 = evaluate_candidates(df_sorted, weights)
 
-    # --- Search and Sort controls ---
+    # --- Search and Sort controls (added alphabetical sort) ---
     st.subheader("Tabel Ringkasan Penilaian")
     search_query = st.text_input("Cari nama (ketik sebagian nama untuk mencari)", value="")
-    sort_option = st.selectbox("Urutkan berdasarkan Overall", options=["Descending (tertinggi)", "Ascending (terendah)"])
+
+    sort_by = st.selectbox(
+        "Urutkan",
+        options=[
+            "Nama A → Z",
+            "Nama Z → A",
+            "Overall Tertinggi",
+            "Overall Terendah"
+        ],
+        index=0
+    )
 
     # Filter by search (case-insensitive, partial)
     if search_query.strip() != "":
@@ -293,9 +303,15 @@ if uploaded_file is not None:
     else:
         filtered = temp1.copy()
 
-    # Sort by Overall
-    ascending = True if sort_option.startswith("Ascending") else False
-    filtered = filtered.sort_values(by="Overall", ascending=ascending).reset_index(drop=True)
+    # Apply sorting berdasarkan pilihan user
+    if sort_by == "Nama A → Z":
+        filtered = filtered.sort_values(by="Name", ascending=True).reset_index(drop=True)
+    elif sort_by == "Nama Z → A":
+        filtered = filtered.sort_values(by="Name", ascending=False).reset_index(drop=True)
+    elif sort_by == "Overall Tertinggi":
+        filtered = filtered.sort_values(by="Overall", ascending=False).reset_index(drop=True)
+    else:  # Overall Terendah
+        filtered = filtered.sort_values(by="Overall", ascending=True).reset_index(drop=True)
 
     # Render HTML summary table using components.html
     html_table = render_summary_html(filtered)
@@ -308,7 +324,6 @@ if uploaded_file is not None:
 
     # Radar chart still uses numeric scores
     st.title("Visualisasi Penilaian Kandidat")
-    # For the selectbox, use the filtered list so user can pick from search results
     names_list = filtered["Name"].tolist()
     if names_list:
         selected_name = st.selectbox("Pilih Nama:", names_list)
