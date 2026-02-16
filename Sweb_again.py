@@ -201,7 +201,7 @@ def evaluate_candidates(df_sorted, weights):
 def render_summary_html(df_display):
     css = """
     <style>
-    .summary-table { border-collapse: collapse; width: 100%; font-family: Times New Roman, sans-serif; }
+    .summary-table { border-collapse: collapse; width: 100%; font-family: sans-serif, sans-serif; }
     .summary-table th, .summary-table td { border: 1px solid #ddd; padding: 8px; vertical-align: top; }
     .summary-table th { background-color: #f4f6fb; text-align: left; padding-top: 12px; padding-bottom: 12px; }
     .cat-title { font-weight: 700; color: #0b5cff; margin-bottom: 6px; display:block; }
