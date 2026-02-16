@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 import streamlit as st
+import streamlit.components.v1 as components
 
 # -------------------------------
 # 🎯 Sidebar: Upload & Parameters
@@ -42,7 +43,7 @@ def evaluate_candidates(df_sorted, weights):
     n = len(df_sorted)
     # containers for numeric scores
     data_Uni = [0]*n
-    data_GTA = [0]*n
+    data_GPA = [0]*n
     data_LT = [0]*n
 
     data_in = [0]*n
@@ -76,56 +77,56 @@ def evaluate_candidates(df_sorted, weights):
 
         # GPA
         try:
-            s = float(df_sorted["GPA|number-3"].iloc[x])
+            s_gpa = float(df_sorted["GPA|number-3"].iloc[x])
         except Exception:
-            s = 0.0
-        if s >= 3.75:
-            data_GTA[x] = 100
-        elif s >= 3.5:
-            data_GTA[x] = 70
-        elif s >= 3.2:
-            data_GTA[x] = 40
+            s_gpa = 0.0
+        if s_gpa >= 3.75:
+            data_GPA[x] = 100
+        elif s_gpa >= 3.5:
+            data_GPA[x] = 70
+        elif s_gpa >= 3.2:
+            data_GPA[x] = 40
         else:
-            data_GTA[x] = 0
+            data_GPA[x] = 0
 
         # Logical Thinking combined score
         denom_lt = (w_uni + w_gpa) if (w_uni + w_gpa) != 0 else 1
-        data_LT[x] = (data_Uni[x]*w_uni + data_GTA[x]*w_gpa) / denom_lt
+        data_LT[x] = (data_Uni[x]*w_uni + data_GPA[x]*w_gpa) / denom_lt
 
         # Leadership
-        s = df_sorted["Have you ever had organizational experience?|radio-18"].iloc[x]
-        if s == "No":
+        s_org = df_sorted["Have you ever had organizational experience?|radio-18"].iloc[x]
+        if s_org == "No":
             data_Exp[x] = 0
             data_Role[x] = 0
         else:
-            s1 = df_sorted["Organization Type|radio-21"].iloc[x]
-            data_Exp[x] = {"International": 100, "National": 70}.get(s1, 40)
+            s_type = df_sorted["Organization Type|radio-21"].iloc[x]
+            data_Exp[x] = {"International": 100, "National": 70}.get(s_type, 40)
 
-            s1 = df_sorted["Organization Role|radio-19"].iloc[x]
-            data_Role[x] = {"Chief or Core Management": 100, "Team Leader (Division or Department Head)": 70}.get(s1, 40)
+            s_role = df_sorted["Organization Role|radio-19"].iloc[x]
+            data_Role[x] = {"Chief or Core Management": 100, "Team Leader (Division or Department Head)": 70}.get(s_role, 40)
 
         denom_ls = (w_type + w_role) if (w_type + w_role) != 0 else 1
         data_LS[x] = (data_Exp[x]*w_type + data_Role[x]*w_role) / denom_ls
 
         # Analytical Skills
-        s = df_sorted["Have you completed any internship?|radio-7"].iloc[x]
+        s_intern = df_sorted["Have you completed any internship?|radio-7"].iloc[x]
         s6 = df_sorted["Have you had any full-time work experience?|radio-5"].iloc[x]
-        if s == "No" and s6 == "No":
+        if s_intern == "No" and s6 == "No":
             data_in[x] = 0
         else:
-            if s == "Consulting Firm" or s6 == "Yes":
+            if s_intern == "Consulting Firm" or s6 == "Yes":
                 data_in[x] = 100
-            elif s in ["Private Companies", "Startup / Tech Companies"]:
+            elif s_intern in ["Private Companies", "Startup / Tech Companies"]:
                 data_in[x] = 70
             else:
                 data_in[x] = 40
 
-        s = df_sorted["Have you received any academic related achievements?|radio-10"].iloc[x]
-        if s == "No":
+        s_ach = df_sorted["Have you received any academic related achievements?|radio-10"].iloc[x]
+        if s_ach == "No":
             data_ach[x] = 0
             data_ach_busi[x] = 0
         else:
-            data_ach[x] = {"International Level": 100, "National Level": 85}.get(s, 70)
+            data_ach[x] = {"International Level": 100, "National Level": 85}.get(s_ach, 70)
             s_case = df_sorted["Have you ever participated in a business case competition?|radio-15"].iloc[x]
             data_ach_busi[x] = {"Yes, as a winner/finalist": 100, "Yes, as a participant": 50}.get(s_case, 0)
 
@@ -143,7 +144,7 @@ def evaluate_candidates(df_sorted, weights):
         "LS_score": data_LS,
         # sub-attributes numeric (kept for reference if needed)
         "Uni_score": data_Uni,
-        "GPA_score": data_GTA,
+        "GPA_score": data_GPA,
         "Internship_score": data_in,
         "Achievement_score": data_ach,
         "BusinessCase_score": data_ach_busi,
@@ -153,10 +154,10 @@ def evaluate_candidates(df_sorted, weights):
 
     # Overall final score
     denom_overall = (w_LT + w_ANA + w_LS) if (w_LT + w_ANA + w_LS) != 0 else 1
-    df_out["Overall"] = df_out["LT_score"] * w_LT / denom_overall + df_out["AS_score"] * w_ANA / denom_overall + df_out["LS_score"] * w_LS / denom_overall
+    df_out["Overall"] = (df_out["LT_score"] * w_LT + df_out["AS_score"] * w_ANA + df_out["LS_score"] * w_LS) / denom_overall
     df_out["Overall"] = df_out["Overall"].round(2)
 
-    # Create multiline display columns (sub-attributes + OVR) — these will be used only for HTML rendering
+    # Create display dicts for HTML rendering
     df_out["Logical Thinking_display"] = df_out.apply(
         lambda r: {
             "title": "Logical Thinking",
@@ -198,11 +199,6 @@ def evaluate_candidates(df_sorted, weights):
 # Helper: render HTML table with subheadings
 # -------------------------------
 def render_summary_html(df_display):
-    """
-    df_display: DataFrame returned by evaluate_candidates()
-    Uses the *_display columns to render styled HTML table with subheadings inside cells.
-    """
-    # CSS styling for table and subheadings
     css = """
     <style>
     .summary-table { border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; }
@@ -217,7 +213,6 @@ def render_summary_html(df_display):
     </style>
     """
 
-    # Build HTML table header
     header = """
     <table class="summary-table">
       <thead>
@@ -241,7 +236,6 @@ def render_summary_html(df_display):
         ls = r["Leadership_display"]
 
         def render_cat(cat):
-            # cat is dict with title and rows list of tuples
             inner = f'<span class="cat-title">{cat["title"]}</span>'
             for label, val in cat["rows"]:
                 inner += f'<div class="sub-row"><span class="sub-label">{label}</span>: <span class="sub-value">{val}</span></div>'
@@ -280,10 +274,16 @@ if uploaded_file is not None:
     weights = (w_uni, w_gpa, w_intern, w_ach, w_case, w_type, w_role, w_LT, w_ANA, w_LS)
     temp1 = evaluate_candidates(df_sorted, weights)
 
-    # Render HTML summary table with subheadings
+    # Render HTML summary table using components.html so it does not show raw code
     st.subheader("Tabel Ringkasan Penilaian")
     html_table = render_summary_html(temp1)
-    st.markdown(html_table, unsafe_allow_html=True)
+
+    # compute height dynamically (approx 80px per row + header)
+    approx_height = 160 + len(temp1) * 80
+    # limit height to a reasonable max to avoid extremely tall embeds
+    height = min(max(approx_height, 300), 2000)
+
+    components.html(html_table, height=height, scrolling=True)
 
     # Radar chart still uses numeric scores
     st.title("Visualisasi Penilaian Kandidat")
