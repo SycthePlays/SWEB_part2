@@ -3,6 +3,7 @@ import numpy as np
 import plotly.graph_objects as go
 import streamlit as st
 import streamlit.components.v1 as components
+import io
 
 # -------------------------------
 # 🎨 Page Config & Global Styling
@@ -296,7 +297,18 @@ def overall_badge_color(val):
     else: return "linear-gradient(135deg,#C85A5A,#A03A3A)"
 
 # -------------------------------
-# Helper: render HTML table dgn start_index
+# Helper: to Excel Buffer
+# -------------------------------
+def convert_df_to_excel(df):
+    output = io.BytesIO()
+    # Bersihkan kolom display sebelum di download
+    clean_df = df.drop(columns=[c for c in df.columns if "_display" in c])
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        clean_df.to_excel(writer, index=False, sheet_name='Ranking Kandidat')
+    return output.getvalue()
+
+# -------------------------------
+# Helper: render HTML table dgn start_index & Horizontal Scroll Fix
 # -------------------------------
 def render_summary_html(df_display, start_index=1):
     css = """
@@ -304,7 +316,16 @@ def render_summary_html(df_display, start_index=1):
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: transparent; font-family: 'DM Sans', sans-serif; color: #E8EDF5; }
-    .tbl-wrap { width: 100%; overflow-x: auto; }
+    
+    /* Perbaikan Horizontal Scroll */
+    .tbl-wrap { 
+        width: 100%; 
+        overflow-x: auto; 
+        overflow-y: hidden; 
+        display: block; 
+        white-space: nowrap; 
+    }
+    
     .summary-table { border-collapse: separate; border-spacing: 0; width: 100%; font-family: 'DM Sans', sans-serif; font-size: 13px; color: #E8EDF5; background: transparent; }
     .summary-table thead tr { background: linear-gradient(90deg, #0D1F3C 0%, #112340 100%); }
     .summary-table th { padding: 14px 16px; text-align: left; font-weight: 600; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #4A90D9; border-bottom: 1px solid rgba(74,144,217,0.25); white-space: nowrap; position: sticky; top: 0; z-index: 2; background: #0D1F3C; }
@@ -318,7 +339,7 @@ def render_summary_html(df_display, start_index=1):
     .index-cell { text-align: center; color: rgba(74,144,217,0.6); font-weight: 600; font-size: 12px; width: 44px; min-width: 44px; }
     .name-cell { font-weight: 600; color: #E8EDF5; white-space: nowrap; min-width: 140px; }
     .meta { color: #6B8BAF; font-size: 12px; font-weight: 400; }
-    .cat-card { background: rgba(74,144,217,0.05); border: 1px solid rgba(74,144,217,0.12); border-radius: 8px; padding: 10px 12px; min-width: 150px; }
+    .cat-card { background: rgba(74,144,217,0.05); border: 1px solid rgba(74,144,217,0.12); border-radius: 8px; padding: 10px 12px; min-width: 150px; display: inline-block; }
     .cat-title { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #4A90D9; margin-bottom: 8px; display: block; }
     .sub-row { display: flex; justify-content: space-between; align-items: center; margin: 4px 0; gap: 12px; }
     .sub-label { font-size: 12px; color: #8AA8CC; font-weight: 400; flex: 1; }
@@ -328,9 +349,12 @@ def render_summary_html(df_display, start_index=1):
     .ovr-value { font-size: 13px; font-weight: 700; color: #E8EDF5; }
     .overall-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 14px; color: #fff; text-align: center; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
     .overall-cell { text-align: center; vertical-align: middle !important; min-width: 80px; }
-    .tbl-wrap::-webkit-scrollbar { height: 4px; }
-    .tbl-wrap::-webkit-scrollbar-track { background: transparent; }
-    .tbl-wrap::-webkit-scrollbar-thumb { background: rgba(74,144,217,0.25); border-radius: 2px; }
+    
+    /* Scrollbar Style for the wrapper */
+    .tbl-wrap::-webkit-scrollbar { height: 8px; width: 8px; }
+    .tbl-wrap::-webkit-scrollbar-track { background: rgba(10, 22, 40, 0.5); border-radius: 4px; }
+    .tbl-wrap::-webkit-scrollbar-thumb { background: rgba(74, 144, 217, 0.5); border-radius: 4px; }
+    .tbl-wrap::-webkit-scrollbar-thumb:hover { background: #4A90D9; }
     </style>
     """
 
@@ -395,7 +419,7 @@ def render_summary_html(df_display, start_index=1):
     return css + header + rows_html + footer
 
 # -------------------------------
-# 🎯 Feature: Popup Detail (Streamlit 1.35+)
+# 🎯 Feature: Popup Detail (Opsional - Streamlit 1.35+)
 # -------------------------------
 @st.dialog("📋 Detail Lengkap Kandidat", width="large")
 def show_popup_detail(row):
@@ -403,14 +427,12 @@ def show_popup_detail(row):
     st.caption(f"📧 **Email:** {row.get('Email', '-')} | 📅 **Tgl Submit:** {row.get('Submission Date', '-')}")
     st.divider()
 
-    # Highlight Skor dengan Metric columns
     m1, m2, m3, m4 = st.columns(4)
     m1.metric("🌟 Overall Score", f"{row['Overall']}")
     m2.metric("🧠 Logical Thinking", f"{row['LT_score']:.2f}")
     m3.metric("📊 Analytical Skills", f"{row['AS_score']:.2f}")
     m4.metric("🗣️ Leadership", f"{row['LS_score']:.2f}")
 
-    # Radar chart yang jauh lebih besar
     categories = ["Logical Thinking", "Analytical Skills", "Leadership"]
     values = [row["LT_score"], row["AS_score"], row["LS_score"]]
     values_closed = values + [values[0]]
@@ -424,7 +446,7 @@ def show_popup_detail(row):
         )
     ])
     fig.update_layout(
-        height=650, # Tinggi diperbesar
+        height=650, 
         polar=dict(
             bgcolor='rgba(13,31,60,0.6)',
             radialaxis=dict(visible=True, range=[0, 100], tickfont=dict(color='#6B8BAF', size=12), gridcolor='rgba(74,144,217,0.15)', linecolor='rgba(74,144,217,0.2)'),
@@ -433,7 +455,8 @@ def show_popup_detail(row):
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', showlegend=False,
         margin=dict(t=40, b=40, l=40, r=40)
     )
-    st.plotly_chart(fig, use_container_width=True)
+    # Scroll zoom aktif juga di popup
+    st.plotly_chart(fig, use_container_width=True, config={'scrollZoom': True, 'displayModeBar': True})
 
 
 # -------------------------------
@@ -450,12 +473,13 @@ if uploaded_file is not None:
 
     st.markdown('<div class="section-heading">Tabel Ringkasan Penilaian</div>', unsafe_allow_html=True)
 
-    # Menambahkan opsi Pagination (Halaman) di sebelah search
     ITEMS_PER_PAGE = 10 
     
-    col1, col2, col3 = st.columns([2, 1, 1])
+    # Menambahkan tombol download Excel di baris kontrol
+    col1, col2, col3, col_dl = st.columns([2, 1.5, 1, 1.5])
+    
     with col1:
-        search_query = st.text_input("🔍 Cari nama kandidat", value="", placeholder="Ketik nama...")
+        search_query = st.text_input("🔍 Cari nama", value="", placeholder="Ketik nama...")
     with col2:
         sort_by = st.selectbox(
             "Urutkan berdasarkan",
@@ -463,7 +487,6 @@ if uploaded_file is not None:
             index=0
         )
 
-    # Logic pencarian dan pengurutan
     if search_query.strip() != "":
         mask = temp1["Name"].str.contains(search_query.strip(), case=False, na=False)
         filtered = temp1[mask].copy()
@@ -479,35 +502,80 @@ if uploaded_file is not None:
     else:
         filtered = filtered.sort_values(by="Overall", ascending=True).reset_index(drop=True)
 
-    # Logic Halaman (Pagination)
     total_pages = max(1, (len(filtered) - 1) // ITEMS_PER_PAGE + 1)
     with col3:
-        page = st.number_input(f"Halaman (1 - {total_pages})", min_value=1, max_value=total_pages, value=1, step=1)
+        page = st.number_input(f"Hal (1-{total_pages})", min_value=1, max_value=total_pages, value=1, step=1)
+        
+    with col_dl:
+        # Menyiapkan data excel
+        st.write("") # Spacer biar sejajar
+        excel_data = convert_df_to_excel(filtered)
+        st.download_button(
+            label="📥 Download Excel",
+            data=excel_data,
+            file_name="Ranking_Kandidat.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            use_container_width=True
+        )
     
-    # Ambil data sesuai halaman (Maksimal 10)
     start_idx = (page - 1) * ITEMS_PER_PAGE
     end_idx = start_idx + ITEMS_PER_PAGE
     paginated_df = filtered.iloc[start_idx:end_idx]
 
     # Render Tabel
     html_table = render_summary_html(paginated_df, start_index=start_idx + 1)
-    approx_height = 160 + len(paginated_df) * 115  # Tinggi menyesuaikan max 10 data
+    approx_height = 160 + len(paginated_df) * 115 
+    # Scrolling = True sudah diset untuk iframe Streamlit-nya, 
+    # dan CSS-nya sekarang sudah bisa scroll menyamping.
     components.html(html_table, height=approx_height, scrolling=True)
 
-    # ── Pop-up Detail ──
+    # ── Tampilan Detail & Visualisasi (Langsung Terbuka) ──
     st.markdown('<div class="section-heading">🔎 Detail & Visualisasi Kandidat</div>', unsafe_allow_html=True)
 
     names_list = filtered["Name"].tolist()
     if names_list:
-        col_select, col_btn = st.columns([3, 1])
-        with col_select:
-            selected_name = st.selectbox("Pilih nama kandidat:", names_list)
-        with col_btn:
-            st.write("") # Memberi jeda agar sejajar secara vertikal
-            st.write("")
-            row_selected = filtered[filtered["Name"] == selected_name].iloc[0]
-            if st.button("📈 Buka Pop-up Detail", use_container_width=True, type="primary"):
-                show_popup_detail(row_selected)
+        selected_name = st.selectbox("Pilih nama kandidat untuk melihat grafik detail:", names_list)
+        
+        row_selected = filtered[filtered["Name"] == selected_name].iloc[0]
+        
+        # Menampilkan metrics angka langsung di bawah selectbox
+        m1, m2, m3, m4 = st.columns(4)
+        m1.metric("🌟 Overall Score", f"{row_selected['Overall']}")
+        m2.metric("🧠 Logical Thinking", f"{row_selected['LT_score']:.2f}")
+        m3.metric("📊 Analytical Skills", f"{row_selected['AS_score']:.2f}")
+        m4.metric("🗣️ Leadership", f"{row_selected['LS_score']:.2f}")
+
+        # Menampilkan Radar Chart langsung
+        categories = ["Logical Thinking", "Analytical Skills", "Leadership"]
+        values = [row_selected["LT_score"], row_selected["AS_score"], row_selected["LS_score"]]
+        values_closed = values + [values[0]]
+        categories_closed = categories + [categories[0]]
+
+        fig = go.Figure(data=[
+            go.Scatterpolar(
+                r=values_closed, theta=categories_closed, fill='toself',
+                name=row_selected["Name"], line=dict(color='#4A90D9', width=3),
+                fillcolor='rgba(74,144,217,0.18)', marker=dict(color='#4A90D9', size=8)
+            )
+        ])
+        fig.update_layout(
+            height=450, 
+            polar=dict(
+                bgcolor='rgba(13,31,60,0.6)',
+                radialaxis=dict(visible=True, range=[0, 100], tickfont=dict(color='#6B8BAF', size=12), gridcolor='rgba(74,144,217,0.15)', linecolor='rgba(74,144,217,0.2)'),
+                angularaxis=dict(tickfont=dict(color='#A8B8D0', size=14, family='DM Sans'), gridcolor='rgba(74,144,217,0.12)', linecolor='rgba(74,144,217,0.2)')
+            ),
+            paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', showlegend=False,
+            margin=dict(t=40, b=40, l=40, r=40)
+        )
+        
+        # Konfigurasi scrollZoom: True untuk memperbolehkan zoom dari mouse/touchpad
+        st.plotly_chart(fig, use_container_width=True, config={'scrollZoom': True, 'displayModeBar': True})
+        
+        # Tombol Pop-up opsional jika mau layar penuh
+        if st.button("📈 Buka di Pop-up Layar Penuh (Opsional)", type="secondary"):
+            show_popup_detail(row_selected)
+            
     else:
         st.info("Tidak ada kandidat yang cocok dengan pencarian.")
 
