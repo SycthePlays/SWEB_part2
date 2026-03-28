@@ -119,16 +119,18 @@ html, body, [class*="css"] {
     border-bottom: 1px solid rgba(74, 144, 217, 0.2);
 }
 
-/* ── Search / Selectbox ── */
+/* ── Search / Selectbox / Number Input ── */
 [data-testid="stTextInput"] input,
-[data-testid="stSelectbox"] > div > div {
+[data-testid="stSelectbox"] > div > div,
+[data-testid="stNumberInput"] input {
     background: rgba(13, 31, 60, 0.8) !important;
     border: 1px solid rgba(74, 144, 217, 0.2) !important;
     border-radius: 6px !important;
     color: #E8EDF5 !important;
 }
 
-[data-testid="stTextInput"] input:focus {
+[data-testid="stTextInput"] input:focus,
+[data-testid="stNumberInput"] input:focus {
     border-color: rgba(74, 144, 217, 0.6) !important;
     box-shadow: 0 0 0 2px rgba(74, 144, 217, 0.12) !important;
 }
@@ -152,20 +154,12 @@ html, body, [class*="css"] {
 ::-webkit-scrollbar-thumb { background: rgba(74, 144, 217, 0.3); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(74, 144, 217, 0.55); }
 
-/* ── Controls row ── */
-.controls-row {
-    display: flex;
-    gap: 1rem;
-    align-items: flex-end;
-    margin-bottom: 1.25rem;
-}
 </style>
 """, unsafe_allow_html=True)
 
 # -------------------------------
 # 🎯 Sidebar: Upload & Parameters
 # -------------------------------
-
 st.sidebar.title("Parameter Penilaian")
 
 uploaded_file = st.sidebar.file_uploader("Pilih file CSV kandidat", type=["csv"])
@@ -197,7 +191,6 @@ w_LS = st.sidebar.slider("Bobot Leadership", 0.0, 1.0, 0.4, 0.01)
 # -------------------------------
 def evaluate_candidates(df_sorted, weights):
     w_uni, w_gpa, w_intern, w_ach, w_case, w_type, w_role, w_LT, w_ANA, w_LS = weights
-
     n = len(df_sorted)
     data_Uni = [0]*n; data_GPA = [0]*n; data_LT = [0]*n
     data_in = [0]*n; data_ach = [0]*n; data_ach_busi = [0]*n; data_ana = [0]*n
@@ -286,214 +279,55 @@ def evaluate_candidates(df_sorted, weights):
 
     return df_out
 
-# -------------------------------
-# Helper: Score color gradient
-# -------------------------------
 def score_color(val):
-    """Returns a color for a 0–100 score: red → amber → blue-green."""
-    try:
-        v = float(val)
-    except Exception:
-        return "#A8B8D0"
-    if v >= 80:
-        return "#4A90D9"
-    elif v >= 60:
-        return "#5BB8A0"
-    elif v >= 40:
-        return "#E0A030"
-    else:
-        return "#C85A5A"
+    try: v = float(val)
+    except Exception: return "#A8B8D0"
+    if v >= 80: return "#4A90D9"
+    elif v >= 60: return "#5BB8A0"
+    elif v >= 40: return "#E0A030"
+    else: return "#C85A5A"
 
 def overall_badge_color(val):
-    try:
-        v = float(val)
-    except Exception:
-        return "#A8B8D0"
+    try: v = float(val)
+    except Exception: return "#A8B8D0"
     if v >= 80: return "linear-gradient(135deg,#4A90D9,#2E6EBF)"
     elif v >= 60: return "linear-gradient(135deg,#5BB8A0,#3A9880)"
     elif v >= 40: return "linear-gradient(135deg,#E0A030,#C08020)"
     else: return "linear-gradient(135deg,#C85A5A,#A03A3A)"
 
 # -------------------------------
-# Helper: render HTML table
+# Helper: render HTML table dgn start_index
 # -------------------------------
-def render_summary_html(df_display):
+def render_summary_html(df_display, start_index=1):
     css = """
     <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-        background: transparent;
-        font-family: 'DM Sans', sans-serif;
-        color: #E8EDF5;
-    }
-
-    .tbl-wrap {
-        width: 100%;
-        overflow-x: auto;
-    }
-
-    .summary-table {
-        border-collapse: separate;
-        border-spacing: 0;
-        width: 100%;
-        font-family: 'DM Sans', sans-serif;
-        font-size: 13px;
-        color: #E8EDF5;
-        background: transparent;
-    }
-
-    /* ── Header ── */
-    .summary-table thead tr {
-        background: linear-gradient(90deg, #0D1F3C 0%, #112340 100%);
-    }
-    .summary-table th {
-        padding: 14px 16px;
-        text-align: left;
-        font-weight: 600;
-        font-size: 11px;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        color: #4A90D9;
-        border-bottom: 1px solid rgba(74,144,217,0.25);
-        white-space: nowrap;
-        position: sticky;
-        top: 0;
-        z-index: 2;
-        background: #0D1F3C;
-    }
+    body { background: transparent; font-family: 'DM Sans', sans-serif; color: #E8EDF5; }
+    .tbl-wrap { width: 100%; overflow-x: auto; }
+    .summary-table { border-collapse: separate; border-spacing: 0; width: 100%; font-family: 'DM Sans', sans-serif; font-size: 13px; color: #E8EDF5; background: transparent; }
+    .summary-table thead tr { background: linear-gradient(90deg, #0D1F3C 0%, #112340 100%); }
+    .summary-table th { padding: 14px 16px; text-align: left; font-weight: 600; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #4A90D9; border-bottom: 1px solid rgba(74,144,217,0.25); white-space: nowrap; position: sticky; top: 0; z-index: 2; background: #0D1F3C; }
     .summary-table th:first-child { border-radius: 8px 0 0 0; }
     .summary-table th:last-child  { border-radius: 0 8px 0 0; }
-
-    /* ── Rows ── */
-    .summary-table tbody tr {
-        background: rgba(13,31,60,0.6);
-        transition: background 0.2s ease;
-        border-bottom: 1px solid rgba(74,144,217,0.08);
-    }
-    .summary-table tbody tr:hover {
-        background: rgba(74,144,217,0.08);
-    }
-    .summary-table tbody tr:nth-child(even) {
-        background: rgba(10,22,40,0.7);
-    }
-    .summary-table tbody tr:nth-child(even):hover {
-        background: rgba(74,144,217,0.08);
-    }
-
-    .summary-table td {
-        padding: 14px 16px;
-        vertical-align: top;
-        border-bottom: 1px solid rgba(74,144,217,0.07);
-    }
-
-    /* ── Index ── */
-    .index-cell {
-        text-align: center;
-        color: rgba(74,144,217,0.6);
-        font-weight: 600;
-        font-size: 12px;
-        width: 44px;
-        min-width: 44px;
-    }
-
-    /* ── Name ── */
-    .name-cell {
-        font-weight: 600;
-        color: #E8EDF5;
-        white-space: nowrap;
-        min-width: 140px;
-    }
-
-    /* ── Meta (email, date) ── */
-    .meta {
-        color: #6B8BAF;
-        font-size: 12px;
-        font-weight: 400;
-    }
-
-    /* ── Category card ── */
-    .cat-card {
-        background: rgba(74,144,217,0.05);
-        border: 1px solid rgba(74,144,217,0.12);
-        border-radius: 8px;
-        padding: 10px 12px;
-        min-width: 150px;
-    }
-
-    .cat-title {
-        font-size: 10px;
-        font-weight: 700;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        color: #4A90D9;
-        margin-bottom: 8px;
-        display: block;
-    }
-
-    .sub-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin: 4px 0;
-        gap: 12px;
-    }
-
-    .sub-label {
-        font-size: 12px;
-        color: #8AA8CC;
-        font-weight: 400;
-        flex: 1;
-    }
-
-    .sub-value {
-        font-size: 12px;
-        font-weight: 700;
-        text-align: right;
-        min-width: 32px;
-    }
-
-    .ovr-row {
-        margin-top: 6px;
-        padding-top: 6px;
-        border-top: 1px solid rgba(74,144,217,0.15);
-    }
-
-    .ovr-label {
-        font-size: 11px;
-        font-weight: 700;
-        color: #4A90D9;
-        letter-spacing: 0.05em;
-    }
-
-    .ovr-value {
-        font-size: 13px;
-        font-weight: 700;
-        color: #E8EDF5;
-    }
-
-    /* ── Overall badge ── */
-    .overall-badge {
-        display: inline-block;
-        padding: 6px 14px;
-        border-radius: 20px;
-        font-weight: 700;
-        font-size: 14px;
-        color: #fff;
-        text-align: center;
-        white-space: nowrap;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-    }
-
-    .overall-cell {
-        text-align: center;
-        vertical-align: middle !important;
-        min-width: 80px;
-    }
-
-    /* ── Scrollbar inside table ── */
+    .summary-table tbody tr { background: rgba(13,31,60,0.6); transition: background 0.2s ease; border-bottom: 1px solid rgba(74,144,217,0.08); }
+    .summary-table tbody tr:hover { background: rgba(74,144,217,0.08); }
+    .summary-table tbody tr:nth-child(even) { background: rgba(10,22,40,0.7); }
+    .summary-table tbody tr:nth-child(even):hover { background: rgba(74,144,217,0.08); }
+    .summary-table td { padding: 14px 16px; vertical-align: top; border-bottom: 1px solid rgba(74,144,217,0.07); }
+    .index-cell { text-align: center; color: rgba(74,144,217,0.6); font-weight: 600; font-size: 12px; width: 44px; min-width: 44px; }
+    .name-cell { font-weight: 600; color: #E8EDF5; white-space: nowrap; min-width: 140px; }
+    .meta { color: #6B8BAF; font-size: 12px; font-weight: 400; }
+    .cat-card { background: rgba(74,144,217,0.05); border: 1px solid rgba(74,144,217,0.12); border-radius: 8px; padding: 10px 12px; min-width: 150px; }
+    .cat-title { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #4A90D9; margin-bottom: 8px; display: block; }
+    .sub-row { display: flex; justify-content: space-between; align-items: center; margin: 4px 0; gap: 12px; }
+    .sub-label { font-size: 12px; color: #8AA8CC; font-weight: 400; flex: 1; }
+    .sub-value { font-size: 12px; font-weight: 700; text-align: right; min-width: 32px; }
+    .ovr-row { margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(74,144,217,0.15); }
+    .ovr-label { font-size: 11px; font-weight: 700; color: #4A90D9; letter-spacing: 0.05em; }
+    .ovr-value { font-size: 13px; font-weight: 700; color: #E8EDF5; }
+    .overall-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 14px; color: #fff; text-align: center; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+    .overall-cell { text-align: center; vertical-align: middle !important; min-width: 80px; }
     .tbl-wrap::-webkit-scrollbar { height: 4px; }
     .tbl-wrap::-webkit-scrollbar-track { background: transparent; }
     .tbl-wrap::-webkit-scrollbar-thumb { background: rgba(74,144,217,0.25); border-radius: 2px; }
@@ -519,28 +353,24 @@ def render_summary_html(df_display):
     """
 
     rows_html = ""
-    for idx, (_, r) in enumerate(df_display.iterrows(), start=1):
+    for idx, (_, r) in enumerate(df_display.iterrows(), start=start_index):
         lt = r["Logical Thinking_display"]
         an = r["Analytical Skills_display"]
         ls = r["Leadership_display"]
 
         def render_cat(cat):
             inner = f'<div class="cat-card"><span class="cat-title">{cat["title"]}</span>'
-            rows = cat["rows"]
-            for i, (label, val) in enumerate(rows):
+            for i, (label, val) in enumerate(cat["rows"]):
                 is_ovr = (label == "OVR")
                 color = score_color(val) if not is_ovr else "#E8EDF5"
-                if is_ovr:
-                    inner += f'<div class="sub-row ovr-row"><span class="sub-label ovr-label">OVR</span><span class="sub-value ovr-value" style="color:{color}">{val}</span></div>'
-                else:
-                    inner += f'<div class="sub-row"><span class="sub-label">{label}</span><span class="sub-value" style="color:{color}">{val}</span></div>'
+                if is_ovr: inner += f'<div class="sub-row ovr-row"><span class="sub-label ovr-label">OVR</span><span class="sub-value ovr-value" style="color:{color}">{val}</span></div>'
+                else: inner += f'<div class="sub-row"><span class="sub-label">{label}</span><span class="sub-value" style="color:{color}">{val}</span></div>'
             inner += '</div>'
             return inner
 
         lt_html = render_cat(lt)
         an_html = render_cat(an)
         ls_html = render_cat(ls)
-
         badge_bg = overall_badge_color(r['Overall'])
         overall_html = f'<span class="overall-badge" style="background:{badge_bg}">{r["Overall"]}</span>'
 
@@ -562,14 +392,53 @@ def render_summary_html(df_display):
     </table>
     </div>
     """
-
     return css + header + rows_html + footer
+
+# -------------------------------
+# 🎯 Feature: Popup Detail (Streamlit 1.35+)
+# -------------------------------
+@st.dialog("📋 Detail Lengkap Kandidat", width="large")
+def show_popup_detail(row):
+    st.markdown(f"## 🧑‍💼 {row['Name']}")
+    st.caption(f"📧 **Email:** {row.get('Email', '-')} | 📅 **Tgl Submit:** {row.get('Submission Date', '-')}")
+    st.divider()
+
+    # Highlight Skor dengan Metric columns
+    m1, m2, m3, m4 = st.columns(4)
+    m1.metric("🌟 Overall Score", f"{row['Overall']}")
+    m2.metric("🧠 Logical Thinking", f"{row['LT_score']:.2f}")
+    m3.metric("📊 Analytical Skills", f"{row['AS_score']:.2f}")
+    m4.metric("🗣️ Leadership", f"{row['LS_score']:.2f}")
+
+    # Radar chart yang jauh lebih besar
+    categories = ["Logical Thinking", "Analytical Skills", "Leadership"]
+    values = [row["LT_score"], row["AS_score"], row["LS_score"]]
+    values_closed = values + [values[0]]
+    categories_closed = categories + [categories[0]]
+
+    fig = go.Figure(data=[
+        go.Scatterpolar(
+            r=values_closed, theta=categories_closed, fill='toself',
+            name=row["Name"], line=dict(color='#4A90D9', width=3),
+            fillcolor='rgba(74,144,217,0.18)', marker=dict(color='#4A90D9', size=8)
+        )
+    ])
+    fig.update_layout(
+        height=650, # Tinggi diperbesar
+        polar=dict(
+            bgcolor='rgba(13,31,60,0.6)',
+            radialaxis=dict(visible=True, range=[0, 100], tickfont=dict(color='#6B8BAF', size=12), gridcolor='rgba(74,144,217,0.15)', linecolor='rgba(74,144,217,0.2)'),
+            angularaxis=dict(tickfont=dict(color='#A8B8D0', size=14, family='DM Sans'), gridcolor='rgba(74,144,217,0.12)', linecolor='rgba(74,144,217,0.2)')
+        ),
+        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', showlegend=False,
+        margin=dict(t=40, b=40, l=40, r=40)
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
 
 # -------------------------------
 # 📊 Main App Logic
 # -------------------------------
-
-# Page header
 st.markdown('<p class="main-subheader">Candidate Evaluation Dashboard</p>', unsafe_allow_html=True)
 st.markdown('<h1 class="main-header">Penilaian Kandidat</h1>', unsafe_allow_html=True)
 
@@ -581,9 +450,12 @@ if uploaded_file is not None:
 
     st.markdown('<div class="section-heading">Tabel Ringkasan Penilaian</div>', unsafe_allow_html=True)
 
-    col1, col2 = st.columns([2, 1])
+    # Menambahkan opsi Pagination (Halaman) di sebelah search
+    ITEMS_PER_PAGE = 10 
+    
+    col1, col2, col3 = st.columns([2, 1, 1])
     with col1:
-        search_query = st.text_input("🔍  Cari nama kandidat", value="", placeholder="Ketik nama...")
+        search_query = st.text_input("🔍 Cari nama kandidat", value="", placeholder="Ketik nama...")
     with col2:
         sort_by = st.selectbox(
             "Urutkan berdasarkan",
@@ -591,6 +463,7 @@ if uploaded_file is not None:
             index=0
         )
 
+    # Logic pencarian dan pengurutan
     if search_query.strip() != "":
         mask = temp1["Name"].str.contains(search_query.strip(), case=False, na=False)
         filtered = temp1[mask].copy()
@@ -606,92 +479,44 @@ if uploaded_file is not None:
     else:
         filtered = filtered.sort_values(by="Overall", ascending=True).reset_index(drop=True)
 
-    html_table = render_summary_html(filtered)
-    approx_height = 160 + len(filtered) * 130
-    height = min(max(approx_height, 300), 2400)
-    components.html(html_table, height=height, scrolling=True)
+    # Logic Halaman (Pagination)
+    total_pages = max(1, (len(filtered) - 1) // ITEMS_PER_PAGE + 1)
+    with col3:
+        page = st.number_input(f"Halaman (1 - {total_pages})", min_value=1, max_value=total_pages, value=1, step=1)
+    
+    # Ambil data sesuai halaman (Maksimal 10)
+    start_idx = (page - 1) * ITEMS_PER_PAGE
+    end_idx = start_idx + ITEMS_PER_PAGE
+    paginated_df = filtered.iloc[start_idx:end_idx]
 
-    # ── Radar Chart ──
-    st.markdown('<div class="section-heading">Visualisasi Radar Kandidat</div>', unsafe_allow_html=True)
+    # Render Tabel
+    html_table = render_summary_html(paginated_df, start_index=start_idx + 1)
+    approx_height = 160 + len(paginated_df) * 115  # Tinggi menyesuaikan max 10 data
+    components.html(html_table, height=approx_height, scrolling=True)
+
+    # ── Pop-up Detail ──
+    st.markdown('<div class="section-heading">🔎 Detail & Visualisasi Kandidat</div>', unsafe_allow_html=True)
 
     names_list = filtered["Name"].tolist()
     if names_list:
-        selected_name = st.selectbox("Pilih kandidat:", names_list)
-        row = filtered[filtered["Name"] == selected_name].iloc[0]
-
-        categories = ["Logical Thinking", "Analytical Skills", "Leadership"]
-        values = [row["LT_score"], row["AS_score"], row["LS_score"]]
-        values_closed = values + [values[0]]
-        categories_closed = categories + [categories[0]]
-
-        fig = go.Figure(data=[
-            go.Scatterpolar(
-                r=values_closed,
-                theta=categories_closed,
-                fill='toself',
-                name=row["Name"],
-                line=dict(color='#4A90D9', width=2),
-                fillcolor='rgba(74,144,217,0.18)',
-                marker=dict(color='#4A90D9', size=7)
-            )
-        ])
-
-        fig.update_layout(
-            polar=dict(
-                bgcolor='rgba(13,31,60,0.6)',
-                radialaxis=dict(
-                    visible=True,
-                    range=[0, 100],
-                    tickfont=dict(color='#6B8BAF', size=10),
-                    gridcolor='rgba(74,144,217,0.15)',
-                    linecolor='rgba(74,144,217,0.2)',
-                ),
-                angularaxis=dict(
-                    tickfont=dict(color='#A8B8D0', size=12, family='DM Sans'),
-                    gridcolor='rgba(74,144,217,0.12)',
-                    linecolor='rgba(74,144,217,0.2)',
-                )
-            ),
-            paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)',
-            showlegend=False,
-            title=dict(
-                text=f"{row['Name']}",
-                font=dict(color='#E8EDF5', size=16, family='DM Sans'),
-                x=0.5
-            ),
-            margin=dict(t=60, b=40, l=40, r=40)
-        )
-        st.plotly_chart(fig, use_container_width=True)
+        col_select, col_btn = st.columns([3, 1])
+        with col_select:
+            selected_name = st.selectbox("Pilih nama kandidat:", names_list)
+        with col_btn:
+            st.write("") # Memberi jeda agar sejajar secara vertikal
+            st.write("")
+            row_selected = filtered[filtered["Name"] == selected_name].iloc[0]
+            if st.button("📈 Buka Pop-up Detail", use_container_width=True, type="primary"):
+                show_popup_detail(row_selected)
     else:
         st.info("Tidak ada kandidat yang cocok dengan pencarian.")
 
 else:
     # Empty state
     st.markdown("""
-    <div style="
-        margin-top: 4rem;
-        text-align: center;
-        padding: 4rem 2rem;
-        background: rgba(13,31,60,0.5);
-        border: 1px solid rgba(74,144,217,0.15);
-        border-radius: 16px;
-        max-width: 540px;
-        margin-left: auto;
-        margin-right: auto;
-    ">
+    <div style="margin-top: 4rem; text-align: center; padding: 4rem 2rem; background: rgba(13,31,60,0.5); border: 1px solid rgba(74,144,217,0.15); border-radius: 16px; max-width: 540px; margin-left: auto; margin-right: auto;">
         <div style="font-size: 2.5rem; margin-bottom: 1rem;">📂</div>
-        <div style="
-            font-family: 'DM Sans', sans-serif;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #E8EDF5;
-            margin-bottom: 0.5rem;
-        ">Unggah File CSV</div>
-        <div style="
-            font-size: 0.875rem;
-            color: #6B8BAF;
-            line-height: 1.6;
-        ">Silakan unggah file CSV kandidat<br>melalui sidebar untuk memulai penilaian.</div>
+        <div style="font-family: 'DM Sans', sans-serif; font-size: 1.1rem; font-weight: 600; color: #E8EDF5; margin-bottom: 0.5rem;">Unggah File CSV</div>
+        <div style="font-size: 0.875rem; color: #6B8BAF; line-height: 1.6;">Silakan unggah file CSV kandidat<br>melalui sidebar untuk memulai penilaian.</div>
     </div>
     """, unsafe_allow_html=True)
