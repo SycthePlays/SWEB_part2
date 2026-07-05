@@ -6,3 +6,5 @@ plotly
 flask
 ipywidgets
 xlsxwriter
+anthropic
+requests
